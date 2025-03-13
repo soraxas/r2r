@@ -590,7 +590,7 @@ impl Node {
     /// This function returns a `Receiver` of ros messages.
     pub fn subscribe_with_receiver<T: 'static>(
         &mut self, topic: &str, qos_profile: QosProfile,
-    ) -> Result<mpsc::Receiver<T>> + Unpin>
+    ) -> Result<mpsc::Receiver<T> + Unpin>
     where
         T: WrappedTypesupport,
     {
