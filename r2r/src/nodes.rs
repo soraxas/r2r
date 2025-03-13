@@ -587,6 +587,28 @@ impl Node {
 
     /// Subscribe to a ROS topic.
     ///
+    /// This function returns a `Receiver` of ros messages.
+    pub fn subscribe_with_receiver<T: 'static>(
+        &mut self, topic: &str, qos_profile: QosProfile,
+    ) -> Result<mpsc::Receiver<T>> + Unpin>
+    where
+        T: WrappedTypesupport,
+    {
+        let subscription_handle =
+            create_subscription_helper(self.node_handle.as_mut(), topic, T::get_ts(), qos_profile)?;
+        let (sender, receiver) = mpsc::channel::<T>(10);
+
+        let ws = TypedSubscriber {
+            rcl_handle: subscription_handle,
+            sender,
+        };
+        self.subscribers.push(Box::new(ws));
+        Ok(receiver)
+    }
+
+
+    /// Subscribe to a ROS topic.
+    ///
     /// This function returns a `Stream` of ros messages without the rust convenience types.
     pub fn subscribe_native<T: 'static>(
         &mut self, topic: &str, qos_profile: QosProfile,
